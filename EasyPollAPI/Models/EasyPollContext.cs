@@ -10,5 +10,10 @@ namespace EasyPollAPI.Models
 
 
         public DbSet<TempUser> Users { get; set; }
+        public DbSet<PollGame> PollGames { get; set; }
+        public DbSet<Question> Questions { get; set; }
+        public DbSet<QuestionAlternative> QuestionAlternative { get; set; }
+        public DbSet<UserAnswer> UserAnswer { get; set; }
+
     }
 }
