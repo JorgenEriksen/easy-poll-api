@@ -11,19 +11,61 @@ namespace EasyPollAPI.Services
         {
             _ctx = easyPollContext;
         }
-        public async Task CreateNewPollGame(PollGameDTO pollGameDTO)
+        public async Task<TempUserDTO> CreateNewPollGame(PollGameDTO pollGameDTO)
         {
+            var newPollGame = new PollGame()
+            {
+                HasStarted = pollGameDTO.HasStarted,
+                AdminIsParticipating = pollGameDTO.AdminIsParticipating,
+            };
+            await _ctx.PollGames.AddAsync(newPollGame);
+            await _ctx.SaveChangesAsync();
+
+
+
             var newTempUser = new TempUser()
             {
 
                 AccessToken = TempUserUtils.GenerateAccessToken(),
                 DisplayName = pollGameDTO.AdminUser.DisplayName,
+                isAdmin = true,
             };
+            newTempUser.PollGame = newPollGame;
+            await _ctx.TempUsers.AddAsync(newTempUser);
+            await _ctx.SaveChangesAsync();
 
-            System.Diagnostics.Debug.WriteLine(newTempUser.AccessToken);
 
-            //_ctx.TempUser.AddAsync(newTempUser);
 
+
+            foreach (var question in pollGameDTO.Questions.Select((value, i) => new { i, value }))
+            {
+                var newQuestion = new Question()
+                {
+                    Title = question.value.Title,
+                    QuestionOrder = question.i,
+                    PollGame = newPollGame,
+                };
+
+                await _ctx.Questions.AddAsync(newQuestion);
+                await _ctx.SaveChangesAsync();
+
+
+                foreach (var alternative in question.value.QuestionAlternatives)
+                {
+                    var newQuestionAlternative = new QuestionAlternative()
+                    {
+                        AlternativeText = alternative.AlternativeText,
+                        Question = newQuestion,
+                    };
+
+                    await _ctx.QuestionAlternatives.AddAsync(newQuestionAlternative);
+                    await _ctx.SaveChangesAsync();
+                }
+            }
+
+
+
+            return new TempUserDTO() { AccessToken = newTempUser.AccessToken, DisplayName = newTempUser.DisplayName, isAdmin = newTempUser.isAdmin };
         }
     }
 }

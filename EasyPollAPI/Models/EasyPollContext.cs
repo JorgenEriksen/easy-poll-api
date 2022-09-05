@@ -8,12 +8,17 @@ namespace EasyPollAPI.Models
         {
         }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
 
-        public DbSet<TempUser> Users { get; set; }
+        }
+
+
+        public DbSet<TempUser> TempUsers { get; set; }
         public DbSet<PollGame> PollGames { get; set; }
         public DbSet<Question> Questions { get; set; }
-        public DbSet<QuestionAlternative> QuestionAlternative { get; set; }
-        public DbSet<UserAnswer> UserAnswer { get; set; }
+        public DbSet<QuestionAlternative> QuestionAlternatives { get; set; }
+        public DbSet<UserAnswer> UserAnswers { get; set; }
 
     }
 }

@@ -19,8 +19,9 @@ namespace EasyPollAPI.Controllers
         [HttpPost]
         public async Task<ActionResult> CreateNewPollGame(PollGameDTO pollGameDTO)
         {
-            await _pollGameService.CreateNewPollGame(pollGameDTO);
-            return Ok();
+            System.Diagnostics.Debug.WriteLine("asdasd");
+            var accessToken = await _pollGameService.CreateNewPollGame(pollGameDTO);
+            return Ok(accessToken);
         }
     }
 }
