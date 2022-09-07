@@ -12,6 +12,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<PollGameService>();
 builder.Services.AddScoped<TempUserService>();
+builder.Services.AddScoped<QuestionService>();
 
 builder.Services.AddDbContext<EasyPollContext>(opt =>
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

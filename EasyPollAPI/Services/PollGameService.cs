@@ -13,10 +13,13 @@ namespace EasyPollAPI.Services
         }
         public async Task<TempUserDTO> CreateNewPollGame(PollGameDTO pollGameDTO)
         {
+
             var newPollGame = new PollGame()
             {
                 HasStarted = pollGameDTO.HasStarted,
                 AdminIsParticipating = pollGameDTO.AdminIsParticipating,
+                CurrentQuestionOrder = 0,
+                InviteCode = PollGameUtils.GenerateInviteCode(6),
             };
             await _ctx.PollGames.AddAsync(newPollGame);
             await _ctx.SaveChangesAsync();

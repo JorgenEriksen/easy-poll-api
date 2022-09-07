@@ -9,7 +9,9 @@ namespace EasyPollAPI.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public bool HasStarted { get; set; }
+        public string InviteCode { get; set; }
         public bool AdminIsParticipating { get; set; }
+        public int CurrentQuestionOrder { get; set; }
         public virtual ICollection<Question> Questions { get; set; }
         public virtual ICollection<TempUser> TempUsers { get; set; }
     }

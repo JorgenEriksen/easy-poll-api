@@ -4,6 +4,7 @@ using EasyPollAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EasyPollAPI.Migrations
 {
     [DbContext(typeof(EasyPollContext))]
-    partial class EasyPollContextModelSnapshot : ModelSnapshot
+    [Migration("20220907083239_CurrentQuestionOrderMigration")]
+    partial class CurrentQuestionOrderMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,10 +40,6 @@ namespace EasyPollAPI.Migrations
 
                     b.Property<bool>("HasStarted")
                         .HasColumnType("bit");
-
-                    b.Property<string>("InviteCode")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
