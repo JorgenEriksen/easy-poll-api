@@ -70,5 +70,14 @@ namespace EasyPollAPI.Services
 
             return new TempUserDTO() { AccessToken = newTempUser.AccessToken, DisplayName = newTempUser.DisplayName, isAdmin = newTempUser.isAdmin };
         }
+
+
+        public async Task AuthenticateInviteCode(string inviteCode)
+        {
+            var pollGame = _ctx.PollGames.FirstOrDefault(pg => pg.InviteCode == inviteCode);
+            if (pollGame == null)
+                throw new Exception("Invalid invite code");
+            return;
+        }
     }
 }

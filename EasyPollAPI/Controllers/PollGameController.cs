@@ -19,9 +19,24 @@ namespace EasyPollAPI.Controllers
         [HttpPost]
         public async Task<ActionResult> CreateNewPollGame(PollGameDTO pollGameDTO)
         {
-            System.Diagnostics.Debug.WriteLine("asdasd");
             var accessToken = await _pollGameService.CreateNewPollGame(pollGameDTO);
             return Ok(accessToken);
         }
+
+        [HttpPost("Authenticate")]
+        public async Task<ActionResult> AuthenticateInviteCode(string inviteCode)
+        {   
+            try
+            {
+                await _pollGameService.AuthenticateInviteCode(inviteCode);
+                return Ok();
+            } catch(Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+            
+        }
+
+
     }
 }
