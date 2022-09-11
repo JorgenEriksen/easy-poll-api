@@ -1,3 +1,4 @@
+using EasyPollAPI.Hubs;
 using EasyPollAPI.Models;
 using EasyPollAPI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSignalR();
 builder.Services.AddScoped<PollGameService>();
 builder.Services.AddScoped<TempUserService>();
 builder.Services.AddScoped<QuestionService>();
@@ -37,8 +39,14 @@ app.UseCors(x => x
     .SetIsOriginAllowed(origin => true) // allow any origin 
     .AllowCredentials());
 
-
-
+/*
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    endpoints.MapHub<PollGameHub>("/PollGameSocket");
+});
+*/
+app.MapHub<PollGameHub>("/PollGameSocket");
 app.MapControllers();
 
 app.Run();

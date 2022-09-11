@@ -14,6 +14,7 @@ namespace EasyPollAPI.Services
 
 
         // usertoken is valid here
+        /*
         public async Task<QuestionToClientDTO> GetQuestionByUserToken(string accessToken)
         {
             var currentUser = _ctx.TempUsers.FirstOrDefault(tu => tu.AccessToken == accessToken);
@@ -24,8 +25,9 @@ namespace EasyPollAPI.Services
             if (pollGame == null)
                 throw new Exception("Can't find poll game! (this should never happen)");
 
-            
-
+            var tempUsers = _ctx.TempUsers.Where(tu => tu.PollGameId == pollGame.Id).Select(tu => new TempUserDTO() { Id = tu.Id, DisplayName = tu.DisplayName }).ToList();
+            if (tempUsers == null || tempUsers.Count < 1)
+                throw new Exception("Can't find users! (this should never happen)");
 
             var question = _ctx.Questions.FirstOrDefault(q => q.PollGame.Id == pollGame.Id && q.QuestionOrder == pollGame.CurrentQuestionOrder);
             if (question == null)
@@ -42,11 +44,12 @@ namespace EasyPollAPI.Services
                 HasStarted = pollGame.HasStarted,
                 InviteCode = pollGame.InviteCode,
                 IsAdmin = currentUser.isAdmin,
-                TempUsers = pollGame.TempUsers.Select(tu => new TempUserDTO() { Id = tu.Id, DisplayName = tu.DisplayName}).ToList(),
+                TempUsers = tempUsers,
                 AdminIsParticipating = pollGame.AdminIsParticipating,
                 QuestionAlternatives = questionAlternatives.Select(a => new QuestionAlternativeDTO() { Id = a.Id, AlternativeText = a.AlternativeText}).ToList(),
             };
             return questionToClientDTO;
         }
+        */
     }
 }

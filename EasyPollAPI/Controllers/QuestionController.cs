@@ -18,15 +18,12 @@ namespace EasyPollAPI.Controllers
             _tempUserService = tempUserService;
         }
 
+        /*
 
         [HttpGet]
         public async Task<ActionResult<QuestionToClientDTO>> GetQuestionByUserToken()
         {
-            System.Diagnostics.Debug.WriteLine("asd");
             var key = Request.Headers.TryGetValue("Authorization", out var accessToken);
-            System.Diagnostics.Debug.WriteLine(key);
-            System.Diagnostics.Debug.WriteLine(accessToken);
-
             if (!key)
                 return NotFound("missing accesstoken");
 
@@ -38,6 +35,7 @@ namespace EasyPollAPI.Controllers
             var questionToClientDTO = await _questionService.GetQuestionByUserToken(accessToken);
             return Ok(questionToClientDTO);
         }
+        */
 
     }
 }
