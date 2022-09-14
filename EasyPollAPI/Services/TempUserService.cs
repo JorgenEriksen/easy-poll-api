@@ -26,7 +26,24 @@ namespace EasyPollAPI.Services
             if (user == null)
                 return false;
             return true;
+        }
 
+        public async Task<TempUserDTO> GetTempUserByAccessToken(string accessToken)
+        {
+            var user = _ctx.TempUsers.FirstOrDefault(tu => tu.AccessToken == accessToken);
+
+            if (user == null)
+                throw new Exception("Invalid accesstoken");
+
+
+            var tempUserDTO = new TempUserDTO()
+            {
+                Id = user.Id,
+                AccessToken = user.AccessToken,
+                isAdmin = user.isAdmin,
+                DisplayName = user.DisplayName,
+            };
+            return tempUserDTO;
         }
 
         public async Task<PollGameDataToClientDTO> GetPollGameDataByUserToken(string accessToken)
@@ -42,28 +59,36 @@ namespace EasyPollAPI.Services
             return PollGameData;
         }
 
-        public async Task<string> CreateUserAndJoinPollGame(JoinPollGameDTO joinPollGameDTO)
+        public async Task<TempUserDTO> CreateUserAndJoinPollGame(JoinPollGameDTO joinPollGameDTO)
         {
             var pollGame = _ctx.PollGames.FirstOrDefault(pg => pg.InviteCode == joinPollGameDTO.InviteCode);
             if (pollGame == null)
                 throw new Exception("Invalid invite code");
+            if(pollGame.HasStarted)
+                throw new Exception("Poll has already started");
 
             var newTempUser = new TempUser()
             {
 
                 AccessToken = TempUserUtils.GenerateAccessToken(),
                 DisplayName = joinPollGameDTO.DisplayName,
-                isAdmin = true,
+                isAdmin = false,
             };
             newTempUser.PollGame = pollGame;
             await _ctx.TempUsers.AddAsync(newTempUser);
-            //await _ctx.SaveChangesAsync();
-            var connectionString = "Socket-PollGameId" + pollGame.Id;
+            await _ctx.SaveChangesAsync();
 
 
-            await _hubContext.Clients.All.SendAsync(connectionString, "test test");
+            _pollGameService.UpdateClientsWithGameData(pollGame.Id);
+            var tempUserDTO = new TempUserDTO()
+            {
+                Id = newTempUser.Id,
+                DisplayName = newTempUser.DisplayName,
+                AccessToken = newTempUser.AccessToken,
+                isAdmin = newTempUser.isAdmin,
 
-            return newTempUser.AccessToken;
+            };
+            return tempUserDTO;
         }
     }
 }

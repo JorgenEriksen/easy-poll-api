@@ -34,8 +34,26 @@ namespace EasyPollAPI.Controllers
             {
                 return NotFound(ex.Message);
             }
-            
         }
+
+        [HttpPut("Start")]
+        public async Task<ActionResult> StartPollGame()
+        {
+            var key = Request.Headers.TryGetValue("Authorization", out var accessToken);
+            if (!key)
+                return NotFound("missing accesstoken");
+
+            try
+            {
+                await _pollGameService.StartPollGame(accessToken);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
 
 
     }

@@ -17,22 +17,28 @@ namespace EasyPollAPI.Controllers
         }
 
         [HttpPost("Authenticate")]
-        public async Task<ActionResult> AuthenticateAccessToken()
+        public async Task<ActionResult<TempUserDTO>> AuthenticateAccessToken()
         {
             var key = Request.Headers.TryGetValue("authorization", out var accessToken);
             if (!key)
                 return NotFound("missing accesstoken");
 
+            try
+            {
+                var tempUserDTO = await _tempUserService.GetTempUserByAccessToken(accessToken);
+                return Ok(tempUserDTO);
+            } catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
 
-            var isValid = await _tempUserService.AuthenticateAccessToken(accessToken);
-            return Ok(new {isValid = isValid});
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateUserAndJoinPollGame(JoinPollGameDTO joinPollGameDTO)
+        public async Task<ActionResult<TempUserDTO>> CreateUserAndJoinPollGame(JoinPollGameDTO joinPollGameDTO)
         {
-            var accessToken = await _tempUserService.CreateUserAndJoinPollGame(joinPollGameDTO);
-            return Ok(accessToken);
+            var tempUserDTO = await _tempUserService.CreateUserAndJoinPollGame(joinPollGameDTO);
+            return Ok(tempUserDTO);
         }
 
         [HttpGet("PollGameData")]

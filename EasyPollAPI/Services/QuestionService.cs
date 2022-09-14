@@ -12,6 +12,47 @@ namespace EasyPollAPI.Services
             _ctx = easyPollContext;
         }
 
+        public async Task SubmitQuestion(string accessToken, SubmitQuestionDTO submitQuestionDTO)
+        {
+            var tempUser = _ctx.TempUsers.FirstOrDefault(tu => tu.AccessToken == accessToken);
+            if (tempUser == null)
+                throw new Exception("Can't find user! (this should never happen)");
+
+            var pollGame = _ctx.PollGames.FirstOrDefault(pg => pg.Id == tempUser.PollGameId);
+            if (pollGame == null)
+                throw new Exception("Can't find poll game! (this should never happen)");
+
+            var question = _ctx.Questions.FirstOrDefault(q => q.PollGame.Id == pollGame.Id && q.QuestionOrder == pollGame.CurrentQuestionOrder);
+            if (question == null)
+                throw new Exception("Can't find question! (this should never happen)");
+
+            var questionAlternatives = _ctx.QuestionAlternatives.Where(qa => qa.Question.Id == question.Id).Select(qa => new QuestionAlternativeDTO() { Id = qa.Id, AlternativeText = qa.AlternativeText }).ToList();
+            if (questionAlternatives.Count < 1)
+                throw new Exception("Can't find question alternatives! (this should never happen)");
+
+            var questionAlternativesId = questionAlternatives.Select(qa => qa.Id).ToList();
+
+            var userAnswer = _ctx.UserAnswers.FirstOrDefault(ua => ua.TempUser.Id == tempUser.Id && questionAlternativesId.Contains(ua.QuestionAlternativeId));
+            
+            // if user has already answered
+            if(userAnswer != null)
+                _ctx.UserAnswers.Remove(userAnswer);
+
+            var alternative = _ctx.QuestionAlternatives.FirstOrDefault(qa => qa.Id == submitQuestionDTO.AlternativeId);
+            if (alternative == null)
+                throw new Exception("Can't find question alternatives!");
+
+            var newUserAnswer = new UserAnswer()
+            {
+                TempUser = tempUser,
+                QuestionAlternative = alternative,
+
+            };
+            _ctx.UserAnswers.Add(newUserAnswer);
+            _ctx.SaveChanges();
+       
+        }
+
 
         // usertoken is valid here
         /*

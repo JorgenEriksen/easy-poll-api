@@ -127,8 +127,26 @@ namespace EasyPollAPI.Services
         public async Task UpdateClientsWithGameData(int pollGameId)
         {
             PollGameDataToClientDTO pollGameDataToClientDTO = await GetGameDataByGameId(pollGameId);
-            var connectionString = "Socket-PollGameId" + pollGameDataToClientDTO.Id;
+            var connectionString = "Socket-PollGameId-" + pollGameDataToClientDTO.Id;
             await _hubContext.Clients.All.SendAsync(connectionString, pollGameDataToClientDTO);
+        }
+
+        public async Task StartPollGame(string accessToken)
+        {
+            var user = _ctx.TempUsers.FirstOrDefault(tu => tu.AccessToken == accessToken);
+            if (user == null)
+                throw new Exception("Invalid accesstoken");
+            if (!user.isAdmin)
+                throw new Exception("You do not have access to start poll");
+
+            var pollGame = _ctx.PollGames.FirstOrDefault(pg => pg.Id == user.PollGameId);
+            if (pollGame == null)
+                throw new Exception("Can't find poll game! (this should never happen)");
+
+            pollGame.HasStarted = true;
+            await _ctx.SaveChangesAsync();
+            await UpdateClientsWithGameData(pollGame.Id);
+
         }
     }
 }
