@@ -7,9 +7,11 @@ namespace EasyPollAPI.Services
     {
 
         private readonly EasyPollContext _ctx;
-        public QuestionService(EasyPollContext easyPollContext)
+        private readonly PollGameService _pollGameService;
+        public QuestionService(EasyPollContext easyPollContext, PollGameService pollGameService)
         {
             _ctx = easyPollContext;
+            _pollGameService = pollGameService;
         }
 
         public async Task SubmitQuestion(string accessToken, SubmitQuestionDTO submitQuestionDTO)
@@ -33,9 +35,9 @@ namespace EasyPollAPI.Services
             var questionAlternativesId = questionAlternatives.Select(qa => qa.Id).ToList();
 
             var userAnswer = _ctx.UserAnswers.FirstOrDefault(ua => ua.TempUser.Id == tempUser.Id && questionAlternativesId.Contains(ua.QuestionAlternativeId));
-            
+
             // if user has already answered
-            if(userAnswer != null)
+            if (userAnswer != null)
                 _ctx.UserAnswers.Remove(userAnswer);
 
             var alternative = _ctx.QuestionAlternatives.FirstOrDefault(qa => qa.Id == submitQuestionDTO.AlternativeId);
@@ -49,9 +51,33 @@ namespace EasyPollAPI.Services
 
             };
             _ctx.UserAnswers.Add(newUserAnswer);
-            _ctx.SaveChanges();
-       
+            await _ctx.SaveChangesAsync();
+            await CheckIfAllUsersHasAnswered(pollGame.Id);
+            _pollGameService.UpdateClientsWithGameData(pollGame.Id);
+
+
         }
+
+        public async Task CheckIfAllUsersHasAnswered(int pollGameId)
+        {
+            var pollGame = _ctx.PollGames.FirstOrDefault(pg => pg.Id == pollGameId);
+            var currentQuestion = _ctx.Questions.FirstOrDefault(q => q.PollGame.Id == pollGame.Id && q.QuestionOrder == pollGame.CurrentQuestionOrder);
+            var questionAlternativesId = _ctx.QuestionAlternatives.Where(qa => qa.QuestionId == currentQuestion.Id).Select(qa => qa.Id);
+            var userAnswers = _ctx.UserAnswers.Where(ua => questionAlternativesId.Contains(ua.QuestionAlternativeId));
+
+            var numberOfUsers = _ctx.TempUsers.Where(tu => tu.PollGameId == pollGame.Id).Count();
+
+            if (userAnswers.Count() == numberOfUsers)
+                await NextQuestion(pollGameId);
+
+            
+        }
+
+        public async Task NextQuestion(int pollGameId)
+        {
+            return;
+        }
+
 
 
         // usertoken is valid here

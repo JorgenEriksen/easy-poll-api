@@ -110,6 +110,10 @@ namespace EasyPollAPI.Services
 
             var questionDTO = new QuestionDTO() { Id = question.Id, Title = question.Title, QuestionOrder = question.QuestionOrder, QuestionAlternatives = questionAlternatives };
 
+            var questionAlternativeIds = questionAlternatives.Select(qa => qa.Id);
+
+            var numberOfAnswers = _ctx.UserAnswers.Where(ua => questionAlternativeIds.Contains(ua.QuestionAlternativeId)).Count();
+
             var pollGameDataToClientDTO = new PollGameDataToClientDTO()
             {
                 Id = question.Id,
@@ -117,6 +121,7 @@ namespace EasyPollAPI.Services
                 InviteCode = pollGame.InviteCode,
                 Admin = adminTempUser,
                 TempUsers = tempUsers,
+                NumberOfAnswers = numberOfAnswers,
                 Question = questionDTO,
                 AdminIsParticipating = pollGame.AdminIsParticipating,
             };
