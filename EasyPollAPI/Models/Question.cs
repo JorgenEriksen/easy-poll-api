@@ -10,6 +10,7 @@ namespace EasyPollAPI.Models
         public int Id { get; set; }
         public string Title { get; set; }
         public int QuestionOrder { get; set; }
+        public int PollGameId { get; set; }
         public PollGame PollGame { get; set; }
         public virtual ICollection<QuestionAlternative> QuestionAlternatives { get; set; }
 

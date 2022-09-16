@@ -28,8 +28,6 @@ namespace EasyPollAPI.Services
             await _ctx.PollGames.AddAsync(newPollGame);
             await _ctx.SaveChangesAsync();
 
-
-
             var newTempUser = new TempUser()
             {
 
@@ -41,9 +39,6 @@ namespace EasyPollAPI.Services
             await _ctx.TempUsers.AddAsync(newTempUser);
             await _ctx.SaveChangesAsync();
 
-
-
-
             foreach (var question in pollGameDTO.Questions.Select((value, i) => new { i, value }))
             {
                 var newQuestion = new Question()
@@ -52,10 +47,8 @@ namespace EasyPollAPI.Services
                     QuestionOrder = question.i,
                     PollGame = newPollGame,
                 };
-
                 await _ctx.Questions.AddAsync(newQuestion);
                 await _ctx.SaveChangesAsync();
-
 
                 foreach (var alternative in question.value.QuestionAlternatives)
                 {
@@ -69,8 +62,6 @@ namespace EasyPollAPI.Services
                     await _ctx.SaveChangesAsync();
                 }
             }
-
-
 
             return new TempUserDTO() { AccessToken = newTempUser.AccessToken, DisplayName = newTempUser.DisplayName, isAdmin = newTempUser.isAdmin };
         }
@@ -134,6 +125,11 @@ namespace EasyPollAPI.Services
             PollGameDataToClientDTO pollGameDataToClientDTO = await GetGameDataByGameId(pollGameId);
             var connectionString = "Socket-PollGameId-" + pollGameDataToClientDTO.Id;
             await _hubContext.Clients.All.SendAsync(connectionString, pollGameDataToClientDTO);
+        }
+
+        public async Task EndPoll(int pollGameId)
+        {
+
         }
 
         public async Task StartPollGame(string accessToken)

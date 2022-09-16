@@ -69,12 +69,26 @@ namespace EasyPollAPI.Services
 
             if (userAnswers.Count() == numberOfUsers)
                 await NextQuestion(pollGameId);
-
-            
+  
         }
 
         public async Task NextQuestion(int pollGameId)
         {
+            var pollGame = _ctx.PollGames.FirstOrDefault(pg => pg.Id == pollGameId);
+            var questions = _ctx.Questions.Where(q => q.PollGameId == pollGameId).ToList();
+            var currentQuestion = _ctx.Questions.FirstOrDefault(q => q.PollGame.Id == pollGame.Id && q.QuestionOrder == pollGame.CurrentQuestionOrder);
+
+            // if on last question, end poll.
+            if (pollGame.CurrentQuestionOrder >= questions.Count - 1)
+            {
+                _pollGameService.EndPoll(pollGameId);
+                return;
+            }
+            pollGame.CurrentQuestionOrder += 1;
+            await _ctx.SaveChangesAsync();
+            _pollGameService.UpdateClientsWithGameData(pollGameId);
+
+
             return;
         }
 
