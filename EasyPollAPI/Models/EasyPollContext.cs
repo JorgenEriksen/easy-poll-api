@@ -20,5 +20,7 @@ namespace EasyPollAPI.Models
         public DbSet<QuestionAlternative> QuestionAlternatives { get; set; }
         public DbSet<UserAnswer> UserAnswers { get; set; }
 
+        public DbSet<PollGameStatusType> PollGameStatusTypes { get; set; }
+
     }
 }

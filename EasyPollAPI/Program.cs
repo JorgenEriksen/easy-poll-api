@@ -1,3 +1,4 @@
+using EasyPollAPI.DbInitializer;
 using EasyPollAPI.Hubs;
 using EasyPollAPI.Models;
 using EasyPollAPI.Services;
@@ -15,6 +16,7 @@ builder.Services.AddSignalR();
 builder.Services.AddScoped<PollGameService>();
 builder.Services.AddScoped<TempUserService>();
 builder.Services.AddScoped<QuestionService>();
+builder.Services.AddScoped<DbInitializer>();
 
 builder.Services.AddDbContext<EasyPollContext>(opt =>
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -48,5 +50,10 @@ app.UseEndpoints(endpoints =>
 */
 app.MapHub<PollGameHub>("/PollGameSocket");
 app.MapControllers();
+
+using (var serviceScope = app.Services.GetService<IServiceScopeFactory>().CreateScope())
+{
+    serviceScope.ServiceProvider.GetService<DbInitializer>().Seed();
+}
 
 app.Run();

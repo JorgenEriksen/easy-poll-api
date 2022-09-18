@@ -3,7 +3,7 @@
     public class PollGameDataToClientDTO
     {
         public int Id { get; set; }
-        public bool HasStarted { get; set; }
+        public string Status { get; set; }
         public string InviteCode { get; set; }
         public TempUserDTO Admin { get; set; }
         public bool AdminIsParticipating { get; set; }

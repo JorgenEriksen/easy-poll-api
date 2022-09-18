@@ -64,7 +64,12 @@ namespace EasyPollAPI.Services
             var pollGame = _ctx.PollGames.FirstOrDefault(pg => pg.InviteCode == joinPollGameDTO.InviteCode);
             if (pollGame == null)
                 throw new Exception("Invalid invite code");
-            if(pollGame.HasStarted)
+
+            var status = _ctx.PollGameStatusTypes.FirstOrDefault(pgst => pgst.Id == pollGame.StatusId);
+            if (status == null)
+                throw new Exception("Can't find status type! (this should never happen)");
+
+            if (status.Type == Constant.Constants.Started || status.Type == Constant.Constants.Ended)
                 throw new Exception("Poll has already started");
 
             var newTempUser = new TempUser()

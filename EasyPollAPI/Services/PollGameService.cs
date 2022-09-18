@@ -3,6 +3,7 @@ using EasyPollAPI.Hubs;
 using EasyPollAPI.Models;
 using EasyPollAPI.Scripts;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 namespace EasyPollAPI.Services
 {
@@ -17,10 +18,13 @@ namespace EasyPollAPI.Services
         }
         public async Task<TempUserDTO> CreateNewPollGame(PollGameDTO pollGameDTO)
         {
+            var status = _ctx.PollGameStatusTypes.FirstOrDefault(pgst => pgst.Type == Constant.Constants.NotStarted);
+            if (status == null)
+                throw new Exception("Can't find status type! (this should never happen)");
 
             var newPollGame = new PollGame()
             {
-                HasStarted = pollGameDTO.HasStarted,
+                Status = status,
                 AdminIsParticipating = pollGameDTO.AdminIsParticipating,
                 CurrentQuestionOrder = 0,
                 InviteCode = PollGameUtils.GenerateInviteCode(6),
@@ -81,6 +85,10 @@ namespace EasyPollAPI.Services
             if (pollGame == null)
                 throw new Exception("Can't find poll game! (this should never happen)");
 
+            var status = _ctx.PollGameStatusTypes.FirstOrDefault(pgst => pgst.Id == pollGame.StatusId);
+            if (status == null)
+                throw new Exception("Can't find status type! (this should never happen)");
+
             var tempUsers = _ctx.TempUsers.Where(tu => tu.PollGameId == pollGame.Id).Select(tu => new TempUserDTO() { Id = tu.Id, DisplayName = tu.DisplayName, isAdmin = tu.isAdmin }).ToList();
             if (tempUsers == null || tempUsers.Count < 1)
                 throw new Exception("Can't find users! (this should never happen)");
@@ -108,7 +116,7 @@ namespace EasyPollAPI.Services
             var pollGameDataToClientDTO = new PollGameDataToClientDTO()
             {
                 Id = question.Id,
-                HasStarted = pollGame.HasStarted,
+                Status = status.Type,
                 InviteCode = pollGame.InviteCode,
                 Admin = adminTempUser,
                 TempUsers = tempUsers,
@@ -120,16 +128,78 @@ namespace EasyPollAPI.Services
 
         }
 
+        public async Task<PollGameResultToClientDTO> GetGameResultByGameId(int pollGameId)
+        {
+            var pollGame = _ctx.PollGames.FirstOrDefault(pg => pg.Id == pollGameId);
+            if (pollGame == null)
+                throw new Exception("Can't find poll game! (this should never happen)");
+
+           
+
+            var questions = _ctx.Questions.Where(q => q.PollGameId == pollGameId);
+            var questionDTOs = new List<QuestionDTO>();
+            foreach(var question in questions)
+            {
+                var questionDTO = new QuestionDTO() { Title = question.Title };
+                var alternatives = _ctx.QuestionAlternatives.Where(qa => qa.Id == question.Id);
+                foreach(var alternative in alternatives)
+                {
+                    var questionAlternativeDTO = new QuestionAlternativeDTO() { AlternativeText = alternative.AlternativeText };
+                    var userAnswers = _ctx.UserAnswers.Where(ua => ua.QuestionAlternativeId == alternative.Id).ToList();
+                    questionAlternativeDTO.usersAnswered = userAnswers.Select(ua => ua.Id).ToList();
+                    questionDTO.QuestionAlternatives.Add(questionAlternativeDTO);
+                }
+                questionDTOs.Add(questionDTO);
+            };
+
+            var tempUsers = _ctx.TempUsers.Where(tu => tu.PollGameId == pollGame.Id).Select(tu => new TempUserDTO(){ Id = tu.Id, DisplayName = tu.DisplayName, isAdmin = tu.isAdmin}).ToList();
+            var pollGameResultToClientDTO = new PollGameResultToClientDTO()
+            {
+                Status = Constant.Constants.Ended,
+                Questions = questionDTOs,
+                TempUsers = tempUsers,
+            };
+            return pollGameResultToClientDTO;
+        }
+
         public async Task UpdateClientsWithGameData(int pollGameId)
         {
-            PollGameDataToClientDTO pollGameDataToClientDTO = await GetGameDataByGameId(pollGameId);
-            var connectionString = "Socket-PollGameId-" + pollGameDataToClientDTO.Id;
-            await _hubContext.Clients.All.SendAsync(connectionString, pollGameDataToClientDTO);
+            var pollGame = _ctx.PollGames.FirstOrDefault(pg => pg.Id == pollGameId);
+            if (pollGame == null)
+                throw new Exception("Can't find poll game! (this should never happen)");
+
+            var status = _ctx.PollGameStatusTypes.FirstOrDefault(pgst => pgst.Id == pollGame.StatusId);
+            if (status == null)
+                throw new Exception("Can't find status type! (this should never happen)");
+
+            var connectionString = "Socket-PollGameId-" + pollGameId;
+            if (status.Type != Constant.Constants.Ended)
+            {
+                PollGameDataToClientDTO pollGameDataToClientDTO = await GetGameDataByGameId(pollGameId);
+                await _hubContext.Clients.All.SendAsync(connectionString, pollGameDataToClientDTO);
+            } else
+            {
+                PollGameResultToClientDTO pollGameDataToClientDTO = await GetGameResultByGameId(pollGameId);
+                await _hubContext.Clients.All.SendAsync(connectionString, pollGameDataToClientDTO);
+            }
+            
+            
+            
         }
 
         public async Task EndPoll(int pollGameId)
         {
+            var endedStatus = await _ctx.PollGameStatusTypes.FirstOrDefaultAsync(pgst => pgst.Type == Constant.Constants.Ended);
+            if (endedStatus == null)
+                throw new Exception("Can't find ended status type! (this should never happen)");
 
+            var pollGame = await _ctx.PollGames.FirstOrDefaultAsync(pg => pg.Id == pollGameId);
+            if (pollGame == null)
+                throw new Exception("Can't find poll game! (this should never happen)");
+
+            pollGame.Status = endedStatus;
+            await _ctx.SaveChangesAsync();
+            UpdateClientsWithGameData(pollGameId);
         }
 
         public async Task StartPollGame(string accessToken)
@@ -144,7 +214,11 @@ namespace EasyPollAPI.Services
             if (pollGame == null)
                 throw new Exception("Can't find poll game! (this should never happen)");
 
-            pollGame.HasStarted = true;
+            var status = _ctx.PollGameStatusTypes.FirstOrDefault(pgst => pgst.Type == Constant.Constants.Started);
+            if (status == null)
+                throw new Exception("Can't find status type! (this should never happen)");
+
+            pollGame.Status = status;
             await _ctx.SaveChangesAsync();
             await UpdateClientsWithGameData(pollGame.Id);
 

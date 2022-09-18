@@ -8,7 +8,8 @@ namespace EasyPollAPI.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
-        public bool HasStarted { get; set; }
+        public int StatusId { get; set; }
+        public PollGameStatusType Status { get; set; }
         public string InviteCode { get; set; }
         public bool AdminIsParticipating { get; set; }
         public int CurrentQuestionOrder { get; set; }
