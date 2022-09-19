@@ -1,5 +1,6 @@
 ﻿using EasyPollAPI.DTO;
 using EasyPollAPI.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace EasyPollAPI.Services
 {
@@ -81,15 +82,15 @@ namespace EasyPollAPI.Services
             // if on last question, end poll.
             if (pollGame.CurrentQuestionOrder >= questions.Count - 1)
             {
-                _pollGameService.EndPoll(pollGameId);
+                var endedStatus = await _ctx.PollGameStatusTypes.FirstOrDefaultAsync(pgst => pgst.Type == Constant.Constants.Ended);
+                if (endedStatus == null)
+                    throw new Exception("Can't find ended status type! (this should never happen)");
+                pollGame.Status = endedStatus;
+                await _ctx.SaveChangesAsync();
                 return;
             }
             pollGame.CurrentQuestionOrder += 1;
             await _ctx.SaveChangesAsync();
-            _pollGameService.UpdateClientsWithGameData(pollGameId);
-
-
-            return;
         }
 
 

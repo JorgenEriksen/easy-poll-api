@@ -3,6 +3,7 @@ using EasyPollAPI.Hubs;
 using EasyPollAPI.Models;
 using EasyPollAPI.Scripts;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 namespace EasyPollAPI.Services
 {
@@ -46,7 +47,7 @@ namespace EasyPollAPI.Services
             return tempUserDTO;
         }
 
-        public async Task<PollGameDataToClientDTO> GetPollGameDataByUserToken(string accessToken)
+        public async Task<dynamic> GetPollGameDataByUserToken(string accessToken)
         {
             var currentUser = _ctx.TempUsers.FirstOrDefault(tu => tu.AccessToken == accessToken);
             if (currentUser == null)
@@ -55,6 +56,17 @@ namespace EasyPollAPI.Services
             var pollGame = _ctx.PollGames.FirstOrDefault(pg => pg.Id == currentUser.PollGameId);
             if (pollGame == null)
                 throw new Exception("Can't find poll game! (this should never happen)");
+
+            var endedStatus = _ctx.PollGameStatusTypes.FirstOrDefault(pgst => pgst.Type == Constant.Constants.Ended);
+            if (endedStatus == null)
+                throw new Exception("Can't find ended status type! (this should never happen)");
+
+            if(pollGame.StatusId == endedStatus.Id)
+            {
+                PollGameResultToClientDTO PollGameResult = await _pollGameService.GetGameResultByGameId(pollGame.Id);
+                return PollGameResult;
+            }
+
             PollGameDataToClientDTO PollGameData = await _pollGameService.GetGameDataByGameId(pollGame.Id);
             return PollGameData;
         }

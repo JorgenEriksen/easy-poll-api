@@ -115,7 +115,7 @@ namespace EasyPollAPI.Services
 
             var pollGameDataToClientDTO = new PollGameDataToClientDTO()
             {
-                Id = question.Id,
+                Id = pollGame.Id,
                 Status = status.Type,
                 InviteCode = pollGame.InviteCode,
                 Admin = adminTempUser,
@@ -136,16 +136,22 @@ namespace EasyPollAPI.Services
 
            
 
-            var questions = _ctx.Questions.Where(q => q.PollGameId == pollGameId);
+            var questions =  _ctx.Questions.Where(q => q.PollGameId == pollGameId).ToList();
+
             var questionDTOs = new List<QuestionDTO>();
             foreach(var question in questions)
             {
-                var questionDTO = new QuestionDTO() { Title = question.Title };
-                var alternatives = _ctx.QuestionAlternatives.Where(qa => qa.Id == question.Id);
-                foreach(var alternative in alternatives)
+                var questionDTO = new QuestionDTO() { Title = question.Title, QuestionAlternatives = new List<QuestionAlternativeDTO>()};
+                System.Diagnostics.Debug.WriteLine("***********");
+                var alternatives = _ctx.QuestionAlternatives.Where(qa => qa.Id == question.Id).ToList();
+                System.Diagnostics.Debug.WriteLine("##########");
+
+                foreach (var alternative in alternatives)
                 {
                     var questionAlternativeDTO = new QuestionAlternativeDTO() { AlternativeText = alternative.AlternativeText };
+   
                     var userAnswers = _ctx.UserAnswers.Where(ua => ua.QuestionAlternativeId == alternative.Id).ToList();
+
                     questionAlternativeDTO.usersAnswered = userAnswers.Select(ua => ua.Id).ToList();
                     questionDTO.QuestionAlternatives.Add(questionAlternativeDTO);
                 }
@@ -173,6 +179,8 @@ namespace EasyPollAPI.Services
                 throw new Exception("Can't find status type! (this should never happen)");
 
             var connectionString = "Socket-PollGameId-" + pollGameId;
+            System.Diagnostics.Debug.WriteLine(connectionString);
+
             if (status.Type != Constant.Constants.Ended)
             {
                 PollGameDataToClientDTO pollGameDataToClientDTO = await GetGameDataByGameId(pollGameId);
@@ -199,7 +207,6 @@ namespace EasyPollAPI.Services
 
             pollGame.Status = endedStatus;
             await _ctx.SaveChangesAsync();
-            UpdateClientsWithGameData(pollGameId);
         }
 
         public async Task StartPollGame(string accessToken)
