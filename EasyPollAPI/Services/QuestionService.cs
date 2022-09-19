@@ -35,7 +35,7 @@ namespace EasyPollAPI.Services
 
             var questionAlternativesId = questionAlternatives.Select(qa => qa.Id).ToList();
 
-            var userAnswer = _ctx.UserAnswers.Where(ua => ua.TempUser.Id == tempUser.Id && questionAlternativesId.Contains(ua.QuestionAlternativeId));
+            var userAnswer = _ctx.UserAnswers.FirstOrDefault(ua => ua.TempUser.Id == tempUser.Id && questionAlternativesId.Contains(ua.QuestionAlternativeId));
 
             // if user has already answered
             if (userAnswer != null)
