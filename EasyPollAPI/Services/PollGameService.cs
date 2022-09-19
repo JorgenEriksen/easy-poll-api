@@ -142,19 +142,19 @@ namespace EasyPollAPI.Services
             foreach(var question in questions)
             {
                 var questionDTO = new QuestionDTO() { Title = question.Title, QuestionAlternatives = new List<QuestionAlternativeDTO>()};
-                System.Diagnostics.Debug.WriteLine("***********");
-                var alternatives = _ctx.QuestionAlternatives.Where(qa => qa.Id == question.Id).ToList();
-                System.Diagnostics.Debug.WriteLine("##########");
-
+                var alternativeDTOs = new List<QuestionAlternativeDTO>();
+                var alternatives = _ctx.QuestionAlternatives.Where(qa => qa.QuestionId == question.Id).ToList();
                 foreach (var alternative in alternatives)
                 {
-                    var questionAlternativeDTO = new QuestionAlternativeDTO() { AlternativeText = alternative.AlternativeText };
+                    var questionAlternativeDTO = new QuestionAlternativeDTO() { AlternativeText = alternative.AlternativeText, usersAnswered = new List<int>() };
    
                     var userAnswers = _ctx.UserAnswers.Where(ua => ua.QuestionAlternativeId == alternative.Id).ToList();
-
-                    questionAlternativeDTO.usersAnswered = userAnswers.Select(ua => ua.Id).ToList();
-                    questionDTO.QuestionAlternatives.Add(questionAlternativeDTO);
+                    var usersAnswered = userAnswers.Select(ua => ua.TempUserId).ToList();
+                    questionAlternativeDTO.usersAnswered = usersAnswered;
+                    alternativeDTOs.Add(questionAlternativeDTO);
+                    //questionDTO.QuestionAlternatives.Add(questionAlternativeDTO);
                 }
+                questionDTO.QuestionAlternatives = alternativeDTOs;
                 questionDTOs.Add(questionDTO);
             };
 
