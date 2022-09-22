@@ -6,7 +6,6 @@ namespace EasyPollAPI.DTO
     {
         public int Id { get; set; }
         public bool HasStarted { get; set; }
-        public bool AdminIsParticipating { get; set; }
         public int? CurrentQuestion { get; set; }
         public TempUserDTO AdminUser { get; set; }
         public List<QuestionDTO> Questions { get; set; }

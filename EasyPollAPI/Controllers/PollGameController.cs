@@ -54,6 +54,24 @@ namespace EasyPollAPI.Controllers
             }
         }
 
+        [HttpDelete]
+        public async Task<ActionResult> DeletePollGame()
+        {
+            var key = Request.Headers.TryGetValue("Authorization", out var accessToken);
+            if (!key)
+                return NotFound("missing accesstoken");
+
+            try
+            {
+                await _pollGameService.DeletePollGame(accessToken);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
 
 
     }

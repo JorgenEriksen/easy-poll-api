@@ -25,7 +25,6 @@ namespace EasyPollAPI.Services
             var newPollGame = new PollGame()
             {
                 Status = status,
-                AdminIsParticipating = pollGameDTO.AdminIsParticipating,
                 CurrentQuestionOrder = 0,
                 InviteCode = PollGameUtils.GenerateInviteCode(6),
             };
@@ -122,7 +121,6 @@ namespace EasyPollAPI.Services
                 TempUsers = tempUsers,
                 NumberOfAnswers = numberOfAnswers,
                 Question = questionDTO,
-                AdminIsParticipating = pollGame.AdminIsParticipating,
             };
             return pollGameDataToClientDTO;
 
@@ -149,10 +147,11 @@ namespace EasyPollAPI.Services
                     var questionAlternativeDTO = new QuestionAlternativeDTO() { AlternativeText = alternative.AlternativeText, usersAnswered = new List<int>() };
    
                     var userAnswers = _ctx.UserAnswers.Where(ua => ua.QuestionAlternativeId == alternative.Id).ToList();
-                    var usersAnswered = userAnswers.Select(ua => ua.TempUserId).ToList();
-                    questionAlternativeDTO.usersAnswered = usersAnswered;
+                    var usersAnswered = userAnswers.Select(ua => ua.TempUserId);
+
+                    questionAlternativeDTO.usersAnswered = (List<int>)usersAnswered;
                     alternativeDTOs.Add(questionAlternativeDTO);
-                    //questionDTO.QuestionAlternatives.Add(questionAlternativeDTO);
+              
                 }
                 questionDTO.QuestionAlternatives = alternativeDTOs;
                 questionDTOs.Add(questionDTO);
@@ -189,10 +188,7 @@ namespace EasyPollAPI.Services
             {
                 PollGameResultToClientDTO pollGameDataToClientDTO = await GetGameResultByGameId(pollGameId);
                 await _hubContext.Clients.All.SendAsync(connectionString, pollGameDataToClientDTO);
-            }
-            
-            
-            
+            }            
         }
 
         public async Task EndPoll(int pollGameId)
@@ -228,6 +224,39 @@ namespace EasyPollAPI.Services
             pollGame.Status = status;
             await _ctx.SaveChangesAsync();
             await UpdateClientsWithGameData(pollGame.Id);
+
+        }
+
+        public async Task DeletePollGame(string accessToken)
+        {
+            var user = _ctx.TempUsers.FirstOrDefault(tu => tu.AccessToken == accessToken);
+            if (user == null)
+                throw new Exception("Invalid accesstoken");
+            if (!user.isAdmin)
+                throw new Exception("You do not have access to delete poll");
+
+            var pollGame = _ctx.PollGames.FirstOrDefault(pg => pg.Id == user.PollGameId);
+            if (pollGame == null)
+                throw new Exception("Can't find poll game! (this should never happen)");
+
+            var tempUser = _ctx.TempUsers.Where(tu => tu.PollGameId == pollGame.Id).ToList();
+            var tempUserIds = tempUser.Select(tu => tu.Id).ToList();
+            var userAnswers = _ctx.UserAnswers.Where(ua => tempUserIds.Contains((int)ua.TempUserId)).ToList();
+
+
+
+            var questions = _ctx.Questions.Where(q => q.Id == pollGame.Id).ToList();
+            var questionIds = questions.Select(q => q.Id ).ToList();
+
+            var questionAlternatives = _ctx.QuestionAlternatives.Where(qa => questionIds.Contains(qa.QuestionId));
+
+            _ctx.RemoveRange(userAnswers);
+            _ctx.RemoveRange(questionAlternatives);
+            _ctx.RemoveRange(questions);
+            _ctx.Remove(pollGame);
+             await _ctx.SaveChangesAsync();
+
+
 
         }
     }

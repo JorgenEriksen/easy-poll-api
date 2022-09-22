@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EasyPollAPI.Migrations
 {
     [DbContext(typeof(EasyPollContext))]
-    [Migration("20220918115423_StatusMigration")]
-    partial class StatusMigration
+    [Migration("20220922073743_MainMigration")]
+    partial class MainMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -31,9 +31,6 @@ namespace EasyPollAPI.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<bool>("AdminIsParticipating")
-                        .HasColumnType("bit");
 
                     b.Property<int>("CurrentQuestionOrder")
                         .HasColumnType("int");

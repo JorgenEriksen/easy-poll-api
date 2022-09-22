@@ -9,17 +9,37 @@ namespace EasyPollAPI.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "PollGameStatusTypes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PollGameStatusTypes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PollGames",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    HasStarted = table.Column<bool>(type: "bit", nullable: false),
-                    AdminIsParticipating = table.Column<bool>(type: "bit", nullable: false)
+                    StatusId = table.Column<int>(type: "int", nullable: false),
+                    InviteCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CurrentQuestionOrder = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PollGames", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PollGames_PollGameStatusTypes_StatusId",
+                        column: x => x.StatusId,
+                        principalTable: "PollGameStatusTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -111,6 +131,11 @@ namespace EasyPollAPI.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_PollGames_StatusId",
+                table: "PollGames",
+                column: "StatusId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_QuestionAlternatives_QuestionId",
                 table: "QuestionAlternatives",
                 column: "QuestionId");
@@ -152,6 +177,9 @@ namespace EasyPollAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "PollGames");
+
+            migrationBuilder.DropTable(
+                name: "PollGameStatusTypes");
         }
     }
 }

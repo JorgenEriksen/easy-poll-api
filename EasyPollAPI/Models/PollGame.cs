@@ -11,7 +11,6 @@ namespace EasyPollAPI.Models
         public int StatusId { get; set; }
         public PollGameStatusType Status { get; set; }
         public string InviteCode { get; set; }
-        public bool AdminIsParticipating { get; set; }
         public int CurrentQuestionOrder { get; set; }
         public virtual ICollection<Question> Questions { get; set; }
         public virtual ICollection<TempUser> TempUsers { get; set; }
