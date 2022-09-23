@@ -63,5 +63,28 @@ namespace EasyPollAPI.Controllers
             }
         }
 
+        [HttpDelete]
+        public async Task<ActionResult> DeleteUserByUserToken()
+        {
+            var key = Request.Headers.TryGetValue("Authorization", out var accessToken);
+            if (!key)
+                return NotFound("missing accesstoken");
+
+
+            var isValid = await _tempUserService.AuthenticateAccessToken(accessToken);
+            if (!isValid)
+                return NotFound("unvalid accesstoken");
+
+            try
+            {
+                await _tempUserService.DeleteUser(accessToken);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
     }
 }

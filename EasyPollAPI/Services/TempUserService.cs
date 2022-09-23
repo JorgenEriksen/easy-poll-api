@@ -71,6 +71,19 @@ namespace EasyPollAPI.Services
             return PollGameData;
         }
 
+        public async Task DeleteUser(string accessToken)
+        {
+            var currentUser = await _ctx.TempUsers.FirstOrDefaultAsync(tu => tu.AccessToken == accessToken);
+            if (currentUser == null)
+                throw new Exception("Not valid user! (this should never happen)");
+
+            var userAnswers = await _ctx.UserAnswers.Where(ua => ua.TempUserId == currentUser.Id).ToListAsync();
+            _ctx.RemoveRange(userAnswers);
+            _ctx.Remove(currentUser);
+            await _ctx.SaveChangesAsync();
+            await _pollGameService.UpdateClientsWithGameData(currentUser.PollGameId);
+        }
+
         public async Task<TempUserDTO> CreateUserAndJoinPollGame(JoinPollGameDTO joinPollGameDTO)
         {
             var pollGame = _ctx.PollGames.FirstOrDefault(pg => pg.InviteCode == joinPollGameDTO.InviteCode);
