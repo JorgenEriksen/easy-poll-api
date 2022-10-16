@@ -30,27 +30,14 @@ namespace EasyPollAPI.Controllers
             if (!isValid)
                 return NotFound("unvalid accesstoken");
 
-            await _questionService.SubmitQuestion(accessToken, submitQuestionDTO);
-            return Ok();
+            try { 
+                await _questionService.SubmitQuestion(accessToken, submitQuestionDTO);
+                return Ok();
+            } catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
-        /*
-
-        [HttpGet]
-        public async Task<ActionResult<QuestionToClientDTO>> GetQuestionByUserToken()
-        {
-            var key = Request.Headers.TryGetValue("Authorization", out var accessToken);
-            if (!key)
-                return NotFound("missing accesstoken");
-
-
-            var isValid = await _tempUserService.AuthenticateAccessToken(accessToken);
-            if (!isValid)
-                return NotFound("unvalid accesstoken");
-
-            var questionToClientDTO = await _questionService.GetQuestionByUserToken(accessToken);
-            return Ok(questionToClientDTO);
-        }
-        */
 
     }
 }

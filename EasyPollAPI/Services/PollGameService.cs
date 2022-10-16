@@ -132,8 +132,6 @@ namespace EasyPollAPI.Services
             if (pollGame == null)
                 throw new Exception("Can't find poll game! (this should never happen)");
 
-           
-
             var questions =  _ctx.Questions.Where(q => q.PollGameId == pollGameId).ToList();
 
             var questionDTOs = new List<QuestionDTO>();
@@ -147,9 +145,9 @@ namespace EasyPollAPI.Services
                     var questionAlternativeDTO = new QuestionAlternativeDTO() { AlternativeText = alternative.AlternativeText, usersAnswered = new List<int>() };
    
                     var userAnswers = _ctx.UserAnswers.Where(ua => ua.QuestionAlternativeId == alternative.Id).ToList();
-                    var usersAnswered = userAnswers.Select(ua => ua.TempUserId);
+                    var usersAnswered = userAnswers.Select(ua => (int)ua.TempUserId).ToList();
 
-                    questionAlternativeDTO.usersAnswered = (List<int>)usersAnswered;
+                    questionAlternativeDTO.usersAnswered = usersAnswered;
                     alternativeDTOs.Add(questionAlternativeDTO);
               
                 }

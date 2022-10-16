@@ -2062,19 +2062,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\joreriks\\.nuget\\packages\\": {}
+    "C:\\Users\\Jørgen\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\privat\\dotnet\\EasyPollAPI\\EasyPollAPI\\EasyPollAPI.csproj",
+      "projectUniqueName": "C:\\prosjekter\\NET\\easy-poll-api\\EasyPollAPI\\EasyPollAPI.csproj",
       "projectName": "EasyPollAPI",
-      "projectPath": "C:\\privat\\dotnet\\EasyPollAPI\\EasyPollAPI\\EasyPollAPI.csproj",
-      "packagesPath": "C:\\Users\\joreriks\\.nuget\\packages\\",
-      "outputPath": "C:\\privat\\dotnet\\EasyPollAPI\\EasyPollAPI\\obj\\",
+      "projectPath": "C:\\prosjekter\\NET\\easy-poll-api\\EasyPollAPI\\EasyPollAPI.csproj",
+      "packagesPath": "C:\\Users\\Jørgen\\.nuget\\packages\\",
+      "outputPath": "C:\\prosjekter\\NET\\easy-poll-api\\EasyPollAPI\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\joreriks\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Jørgen\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -2137,7 +2137,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.303\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.301\\RuntimeIdentifierGraph.json"
       }
     }
   }
